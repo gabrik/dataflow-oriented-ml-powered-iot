@@ -1,0 +1,112 @@
+version: "3.2"
+
+services:
+
+  # tcpdump:
+  #   image: kaazing/tcpdump
+  #   network_mode: "host"
+  #   volumes:
+  #     - ./results:/tcpdump
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - 1883:1883
+    # depends_on:
+    #   - tcpdump
+  
+  storager:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./storager/storager.py:/runnable.py
+      - ./config.ini:/config.ini
+      - ./results:/results
+    depends_on:
+      - mosquitto
+
+  evaluator:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./evaluator/evaluator.py:/runnable.py
+      - ./config.ini:/config.ini
+    depends_on:
+      - mosquitto
+
+  comparator:
+    image: python_runner
+    volumes:
+      - ./comparator/comparator.py:/runnable.py
+      - ./config.ini:/config.ini
+      - ./results:/results
+    command: python runnable.py
+    depends_on:
+      - evaluator
+
+  trainer:
+    image: python_runner
+    volumes:
+      - ./:/root:z
+      - /run/docker.sock:/run/docker.sock:ro
+      - ./trainer/script.sh:/script.sh
+      - ./trainer/trainer.py:/runnable.py
+      - ./config.ini:/config.ini
+      - ./results:/results
+    command: bash ./script.sh
+    depends_on:
+      - comparator
+    deploy:
+      mode: replicated
+      replicas: 8
+
+  batcher:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./batcher/batcher.py:/runnable.py
+      - ./config.ini:/config.ini
+      - ./results:/results
+    depends_on:
+      - trainer
+
+  preprocessor:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./preprocessor/preprocessor.py:/runnable.py
+      - ./config.ini:/config.ini
+    depends_on:
+      - batcher
+
+  filler:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./filler/filler.py:/runnable.py
+      - ./config.ini:/config.ini
+    depends_on:
+      - preprocessor
+
+  aggregator:
+    image: python_runner
+    command: python runnable.py
+    volumes:
+      - ./aggregator/aggregator.py:/runnable.py
+      - ./config.ini:/config.ini
+    depends_on:
+      - filler
+
+  house:
+    image: python_runner
+    volumes:
+      - ./house_v2/house.py:/runnable.py
+      - ./config.ini:/config.ini
+      - ./dataset/:/dataset/
+    command: python runnable.py
+    depends_on:
+      - aggregator

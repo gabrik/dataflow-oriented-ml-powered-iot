@@ -1,0 +1,14 @@
+id: filler
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+uri: "file://{{ BASE_DIR }}/filler/filler.py"
+configuration:
+  buffer_time: 60
+  step_time: 1
+inputs: [filler]
+outputs:
+  - analisis
+  - storage
+  - preprocessor

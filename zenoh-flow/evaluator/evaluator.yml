@@ -1,0 +1,11 @@
+id: evaluator
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+uri: "file://{{ BASE_DIR }}/evaluator/evaluator.py"
+
+inputs:
+  - test_model
+  - test
+outputs: [predictions]

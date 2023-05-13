@@ -1,0 +1,9 @@
+id: aggregator
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+uri: "file://{{ BASE_DIR }}/aggregator/aggregator.py"
+
+inputs: [house_data]
+outputs: [filler]

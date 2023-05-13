@@ -1,0 +1,159 @@
+version: "3.2"
+
+services:
+  zenoh-router:
+    image: eclipse/zenoh
+    environment:
+      - RUST_LOG=zenoh=info
+    ports:
+      - 7447:7447
+      - 8000:8000
+
+  evaluator:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: evaluator
+    depends_on:
+      - zenoh-router
+      - predictions
+      - analysis
+      - store
+      - results
+
+  trainer:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: trainer
+    depends_on:
+      - zenoh-router
+      - evaluator
+
+  batcher:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: batcher
+    depends_on:
+      - zenoh-router
+      - trainer
+
+  preprocessor:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: preprocessor
+    depends_on:
+      - zenoh-router
+      - batcher
+
+  filler:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: filler
+    depends_on:
+      - zenoh-router
+      - preprocessor
+
+  aggregator:
+    image: gabrik91/zenoh-flow-runtime
+    volumes:
+      - ./:/var/zenoh-flow/nodes:ro
+      - ./flow:/var/zenoh-flow/flows:ro
+      - ./zenoh-flow-runtime/etc:/etc/zenoh-flow:ro
+    environment:
+      FLOW: house-ai.yml
+      RT: aggregator
+      RUST_LOG: zenoh_flow=info
+    depends_on:
+      - zenoh-router
+      - filler
+
+
+  house:
+    image: gabrik91/house
+    volumes:
+      - ./:/root:z
+      - /run/docker.sock:/run/docker.sock:ro
+      - ./house/house.py:/runnable.py
+      - ./house/script.sh:/script.sh
+    command: bash ./script.sh
+    depends_on:
+      - aggregator
+      - zenoh-router
+    deploy:
+      mode: replicated
+      replicas: 13
+
+  results:
+    image: gabrik91/logger
+    volumes:
+      - ./results:/results
+    environment:
+       KEY: results
+       FILE: results
+    depends_on:
+      - zenoh-router
+
+
+  store:
+    image: gabrik91/logger
+    volumes:
+      - ./results:/results
+    environment:
+       KEY: store
+       FILE: store
+    depends_on:
+      - zenoh-router
+
+  analysis:
+    image: gabrik91/logger
+    volumes:
+      - ./results:/results
+    environment:
+       KEY: analysis
+       FILE: analysis
+    depends_on:
+      - zenoh-router
+
+  predictions:
+    image: gabrik91/logger
+    volumes:
+      - ./results:/results
+    environment:
+       KEY: predictions
+       FILE: predictions
+    depends_on:
+      - zenoh-router
+
+  batches:
+    image: gabrik91/logger
+    volumes:
+      - ./results:/results
+    environment:
+       KEY: batches
+       FILE: batches
+    depends_on:
+      - zenoh-router

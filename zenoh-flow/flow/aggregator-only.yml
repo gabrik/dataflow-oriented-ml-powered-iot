@@ -1,0 +1,48 @@
+flow: hello-world
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+sources:
+  - id: houses
+    configuration:
+      key-expressions:
+        house_data: house_data
+    descriptor: "builtin://zenoh"
+
+
+operators:
+
+  - id: aggregator
+    descriptor: "file://{{ BASE_DIR }}/aggregator/aggregator.yml"
+
+sinks:
+  - id: debug
+    configuration:
+      key-expressions:
+        in: debug/aggregator
+    descriptor: "builtin://zenoh"
+
+links:
+
+# sources
+  - from:
+      node: houses
+      output: house_data
+    to:
+      node: aggregator
+      input: house_data
+
+# sink
+  - from:
+      node: aggregator
+      output: filler
+    to:
+      node: debug
+      input: in
+
+
+mapping:
+  houses: aggregator
+  aggregator: aggregator
+  debug: aggregator

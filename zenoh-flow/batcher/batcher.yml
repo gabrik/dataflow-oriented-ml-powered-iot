@@ -1,0 +1,12 @@
+id: batcher
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+configuration:
+  buffer_size: 10000
+uri: "file://{{ BASE_DIR }}/batcher/batcher.py"
+inputs: [batch]
+outputs:
+  - train
+  - test
+  - store

@@ -1,0 +1,12 @@
+id: trainer
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+configuration:
+  seed: 7
+uri: "file://{{ BASE_DIR }}/trainer/trainer.py"
+
+inputs: [train]
+outputs:
+  - test_model
+  - ml_storager

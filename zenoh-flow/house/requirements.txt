@@ -1,0 +1,4 @@
+paho-mqtt==1.6.1
+pandas==1.4.3
+scikit-learn==1.1.2
+eclipse-zenoh==0.7.0rc0

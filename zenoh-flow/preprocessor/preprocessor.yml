@@ -1,0 +1,9 @@
+id: preprocessor
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+uri: "file://{{ BASE_DIR }}/preprocessor/preprocessor.py"
+
+inputs: [preprocessor]
+outputs: [batch]

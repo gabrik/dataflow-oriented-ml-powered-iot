@@ -1,0 +1,127 @@
+flow: hello-world
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+sources:
+  - id: houses
+    configuration:
+      key-expressions:
+        house_data: house_data
+    descriptor: "builtin://zenoh"
+
+
+operators:
+
+  - id: aggregator
+    descriptor: "file://{{ BASE_DIR }}/aggregator/aggregator.yml"
+
+  - id: filler
+    configuration:
+      sleep_time: 1
+      buffer_time: 60
+    descriptor: "file://{{ BASE_DIR }}/filler/filler.yml"
+
+  - id: preprocessor
+    descriptor: "file://{{ BASE_DIR }}/preprocessor/preprocessor.yml"
+
+  - id: batcher
+    descriptor: "file://{{ BASE_DIR }}/batcher/batcher.yml"
+
+  - id: trainer
+    descriptor: "file://{{ BASE_DIR }}/trainer/trainer.yml"
+
+sinks:
+  - id: debug
+    configuration:
+      key-expressions:
+        in: debug/1
+        in2: debug/2
+        in3: debug/3
+        in4: debug/4
+        in5: debug/5
+    descriptor: "builtin://zenoh"
+
+links:
+
+# sources
+  - from:
+      node: houses
+      output: house_data
+    to:
+      node: aggregator
+      input: house_data
+
+  - from:
+      node: aggregator
+      output: filler
+    to:
+      node: filler
+      input: filler
+
+# operators
+  - from:
+      node: filler
+      output: preprocessor
+    to:
+      node: preprocessor
+      input: preprocessor
+
+  - from:
+      node: preprocessor
+      output: batch
+    to:
+      node: batcher
+      input: batch
+
+  - from:
+      node: batcher
+      output: train
+    to:
+      node: trainer
+      input: train
+
+# sink
+  - from:
+      node: trainer
+      output: test_model
+    to:
+      node: debug
+      input: in
+
+  - from:
+      node: batcher
+      output: test
+    to:
+      node: debug
+      input: in4
+
+  - from:
+      node: filler
+      output: analisis
+    to:
+      node: debug
+      input: in2
+
+  - from:
+      node: filler
+      output: storage
+    to:
+      node: debug
+      input: in3
+
+  - from:
+      node: trainer
+      output: ml_storager
+    to:
+      node: debug
+      input: in5
+
+mapping:
+  houses: aggregator
+  aggregator: aggregator
+  filler: filler
+  preprocessor: preprocessor
+  batcher: batcher
+  trainer: trainer
+  debug: aggregator

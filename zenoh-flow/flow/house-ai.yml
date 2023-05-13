@@ -1,0 +1,172 @@
+flow: hello-world
+
+vars:
+ BASE_DIR: "/var/zenoh-flow/nodes"
+
+sources:
+  - id: houses
+    configuration:
+      key-expressions:
+        house_data: house_data
+    descriptor: "builtin://zenoh"
+
+
+operators:
+
+  - id: aggregator
+    descriptor: "file://{{ BASE_DIR }}/aggregator/aggregator.yml"
+
+  - id: filler
+    configuration:
+      sleep_time: 1
+      buffer_time: 60
+    descriptor: "file://{{ BASE_DIR }}/filler/filler.yml"
+
+  - id: preprocessor
+    descriptor: "file://{{ BASE_DIR }}/preprocessor/preprocessor.yml"
+
+  - id: batcher
+    descriptor: "file://{{ BASE_DIR }}/batcher/batcher.yml"
+
+  - id: trainer
+    descriptor: "file://{{ BASE_DIR }}/trainer/trainer.yml"
+
+  - id: evaluator
+    descriptor: "file://{{ BASE_DIR }}/evaluator/evaluator.yml"
+
+sinks:
+  - id: store
+    configuration:
+      key-expressions:
+        in: store
+    descriptor: "builtin://zenoh"
+
+  - id: analysis
+    configuration:
+      key-expressions:
+        in: analysis
+    descriptor: "builtin://zenoh"
+
+  - id: predictions
+    configuration:
+      key-expressions:
+        in: predictions
+    descriptor: "builtin://zenoh"
+
+  - id: results
+    configuration:
+      key-expressions:
+        results: results
+    descriptor: "builtin://zenoh"
+
+  - id: batches
+    configuration:
+      key-expressions:
+        batches: batches
+    descriptor: "builtin://zenoh"
+
+links:
+
+# sources
+  - from:
+      node: houses
+      output: house_data
+    to:
+      node: aggregator
+      input: house_data
+
+# operators
+  - from:
+      node: aggregator
+      output: filler
+    to:
+      node: filler
+      input: filler
+
+  - from:
+      node: filler
+      output: preprocessor
+    to:
+      node: preprocessor
+      input: preprocessor
+
+  - from:
+      node: preprocessor
+      output: batch
+    to:
+      node: batcher
+      input: batch
+
+  - from:
+      node: batcher
+      output: train
+    to:
+      node: trainer
+      input: train
+
+  - from:
+      node: batcher
+      output: test
+    to:
+      node: evaluator
+      input: test
+
+  - from:
+      node: trainer
+      output: test_model
+    to:
+      node: evaluator
+      input: test_model
+
+# sinks
+  - from:
+      node: evaluator
+      output: predictions
+    to:
+      node: predictions
+      input: in
+
+  - from:
+      node: trainer
+      output: ml_storager
+    to:
+      node: results
+      input: results
+
+
+  - from:
+      node: filler
+      output: analisis
+    to:
+      node: analysis
+      input: in
+
+  - from:
+      node: filler
+      output: storage
+    to:
+      node: store
+      input: in
+
+  - from:
+      node: batcher
+      output: train
+    to:
+      node: batches
+      input: batches
+
+
+mapping:
+  houses: aggregator
+  aggregator: aggregator
+  filler: filler
+  preprocessor: preprocessor
+  batcher: batcher
+  evaluator: evaluator
+  trainer: trainer
+# sinks
+  store: filler
+  analysis: filler
+  predictions: evaluator
+  results: trainer
+  batches: batcher
