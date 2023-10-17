@@ -32,4 +32,7 @@ docker compose up
 ### Citation
 If you sue this work please site accordingly:
 
-Baldoni, Gabriele & Teixeira, Rafael & Guimarães, Carlos & Antunes, Mário & Gomes, Diogo & Corsaro, Angelo. (2023). A Dataflow-Oriented Approach for Machine-Learning-Powered Internet of Things Applications. Electronics. 12. 3940. 10.3390/electronics12183940. 
+Baldoni, Gabriele & Teixeira, Rafael & Guimarães, Carlos & Antunes, Mário & Gomes, Diogo & Corsaro, Angelo. (2023).
+A Dataflow-Oriented Approach for Machine-Learning-Powered Internet of Things Applications.
+Electronics. 12. 3940.
+[DOI](https://doi.org/10.3390/electronics12183940)
