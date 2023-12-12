@@ -7,7 +7,33 @@ authors:
   - family-names: Teixeira
     given-names: Rafael
     orcid: https://orcid.org/0000-0001-7211-382X
-title: "Repository for the paper entitled A Dataflow-Oriented Approach for Machine-Learning-Powered
-Internet of Things Applications"
-version: 1.0
-date-released: 2023-08-11
+title: "Repository for the paper entitled A Dataflow-Oriented Approach for Machine-Learning-Powered Internet of Things Applications"
+version: 1.0.0
+doi: 10.3390/electronics12183940
+date-released: 2023-09-10
+url: "https://github.com/gabrik/dataflow-oriented-ml-powered-iot/"
+preferred-citation:
+  type: journal
+  authors:
+  - family-names: Baldoni
+    given-names: Gabriele
+    orcid: https://orcid.org/0000-0001-9712-0639
+  - family-names: "Teixeira"
+    given-names: "Rafael"
+    orcid: "https://orcid.org/0000-0001-7211-382X"
+  - family-names: "Antunes"
+    given-names: "Mário"
+    orcid: "https://orcid.org/0000-0002-6504-9441"
+  - family-names: "Gomes"
+    given-names: "Diogo"
+    orcid: "https://orcid.org/0000-0002-5848-2802"
+
+  title: "A Dataflow-Oriented Approach for Machine-Learning-Powered Internet of Things Applications"
+  doi: 10.3390/electronics12183940
+  journal: "Electronics"
+  volume: 12
+  number: 18
+  url: "https://www.mdpi.com/2079-9292/12/18/3940"
+  issn: "2079-9292"
+  month: 11
+  year: 2023
